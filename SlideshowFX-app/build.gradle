@@ -19,7 +19,6 @@ dependencies {
     compile configurations.fontawesomefx
     compile configurations.freemarker
     compile configurations.jsoup
-    compile configurations.leapmotion
     compile configurations.twitter4j
     compile configurations.vertx
     compile configurations.zxing

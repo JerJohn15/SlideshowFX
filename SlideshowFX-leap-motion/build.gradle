@@ -1,0 +1,31 @@
+version = '1.0.0'
+
+dependencies {
+    compile project(':SlideshowFX-app')
+    compile project(':SlideshowFX-global-configuration')
+    compile project(':SlideshowFX-server')
+    compile project(':SlideshowFX-plugin')
+
+    compile configurations.felix
+    compile configurations.leapmotion
+}
+
+jar {
+    from(configurations.leapmotion.resolve().collect()) {
+        include '*'
+    }
+
+    manifest {
+        attributes('Manifest-Version': '1.0',
+                'Bundle-ManifestVersion': '2',
+                'Bundle-Name': 'SlideshowFX LeapMotion plugin',
+                'Bundle-SymbolicName': 'com.twasyl.slideshowfx.leap',
+                'Bundle-Description': 'Support for using a LeapMotion inside SlideshowFX',
+                'Bundle-Version': version,
+                'Bundle-Activator': 'com.twasyl.slideshowfx.leapmotion.activator.LeapMotionActivator',
+                'Bundle-ClassPath': configurations.leapmotion.resolve().collect { artifact -> artifact.name }.join(',').concat(',.'),
+                'Bundle-Vendor': 'Thierry Wasylczenko',
+                'Export-Package': 'com/twasyl/slideshowfx/leapmotion,com/twasyl/slideshowfx/leapmotion/activator,com/twasyl/slideshowfx/leapmotion/listener',
+                'Import-Package': 'org.osgi.framework')
+    }
+}

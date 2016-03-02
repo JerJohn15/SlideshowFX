@@ -1,5 +1,7 @@
 package com.twasyl.slideshowfx.plugin;
 
+import javafx.scene.Node;
+
 /**
  * A basic implementation of a {@link IPlugin}.
  * @author Thierry Wasylczenko
@@ -8,6 +10,7 @@ package com.twasyl.slideshowfx.plugin;
  */
 public class AbstractPlugin<T extends IPluginOptions> implements IPlugin<T> {
     private String name;
+    protected Node slideshowFXUiElement;
     private T options;
 
     /**
@@ -17,6 +20,7 @@ public class AbstractPlugin<T extends IPluginOptions> implements IPlugin<T> {
     protected AbstractPlugin(final String name) {
         this.name = name;
         this.options = null;
+        this.slideshowFXUiElement = null;
     }
 
     /**
@@ -31,6 +35,9 @@ public class AbstractPlugin<T extends IPluginOptions> implements IPlugin<T> {
 
     @Override
     public String getName() { return this.name; }
+
+    @Override
+    public Node getSlideshowFXUiElement() { return this.slideshowFXUiElement; }
 
     @Override
     public T getOptions() { return this.options; }

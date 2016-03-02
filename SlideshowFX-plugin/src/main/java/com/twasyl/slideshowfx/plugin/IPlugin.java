@@ -1,5 +1,7 @@
 package com.twasyl.slideshowfx.plugin;
 
+import javafx.scene.Node;
+
 /**
  * Defines the base interface to create a plugin for SlideshowFX. A plugin is a piece of software
  * that can be used by SlideshowFX in order to add features to it.
@@ -15,6 +17,12 @@ public interface IPlugin<T extends IPluginOptions> {
      * @return The name of the plugin.
      */
     String getName();
+
+    /**
+     * Get the UI element that will be inserted inside the SlideshowFX user interface.
+     * @return The {@link Node} element that will be inserted inside the UI.
+     */
+    Node getSlideshowFXUiElement();
 
     /**
      * Get the options of the plugins. Options defines the custom parameters of a plugin and each plugin can defines it's

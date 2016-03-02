@@ -1,8 +1,7 @@
 package com.twasyl.slideshowfx.controls.slideshow;
 
-import com.leapmotion.leap.Controller;
 import com.twasyl.slideshowfx.engine.presentation.configuration.Slide;
-import com.twasyl.slideshowfx.leap.SlideshowFXLeapListener;
+import com.twasyl.slideshowfx.server.bus.Actor;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
@@ -24,12 +23,24 @@ import java.util.logging.Logger;
  * @version 1.0.0
  * @since SlideshowFX 1.0.0
  */
-public class SlideshowStage {
+public class SlideshowStage implements Actor {
+
+    public enum MessageType {
+        CHANGE_SLIDE, SHOW_POINTER, HIDE_POINTER
+    }
+
+    public static class Message {
+        private MessageType type;
+        private Object value;
+    }
+
     private static final Logger LOGGER = Logger.getLogger(SlideshowStage.class.getName());
     private static final String DO_NOT_CONSIDER_EVENT_TEXT = "do_not_consider";
     private Context context;
-    private Controller controller;
-    private SlideshowFXLeapListener listener;
+
+    // TODO LeapMotion
+    // private Controller controller;
+    // private SlideshowFXLeapListener listener;
 
     private Runnable onCloseAction = null;
     private Stage slideshowStage, informationStage;
@@ -45,9 +56,25 @@ public class SlideshowStage {
 
         this.initializeSlideshowStage();
         this.initializeInformationStage();
-        this.initializeLeapMotion();
+
+        // TODO LeapMotion
+        // this.initializeLeapMotion();
 
         this.initializeKeyEvents();
+    }
+
+    @Override
+    public boolean supportsMessage(Object message) {
+        if(message == null) return false;
+
+
+
+        return false;
+    }
+
+    @Override
+    public void onMessage(Object message) {
+
     }
 
     /**
@@ -129,10 +156,11 @@ public class SlideshowStage {
     }
 
     /**
+     * TODO LeapMotion
      * Initialize LeapMotion for this stage. It creates a LeapMotion {@link com.leapmotion.leap.Listener} as well as a
      * {@link Controller} if the {@link Context#isLeapMotionEnabled()} returns {@code true}.
      */
-    private final void initializeLeapMotion() {
+    /*private final void initializeLeapMotion() {
         if(this.context.isLeapMotionEnabled()) {
             this.listener = new SlideshowFXLeapListener(this.slideshowPane);
             this.listener.setTracking(true);
@@ -153,7 +181,7 @@ public class SlideshowStage {
                 this.controller.removeListener(this.listener);
             }
         });
-    }
+    } */
 
     /**
      * Set the management of {@link KeyEvent} fired within the screens and browsers displayed. This allows to define the

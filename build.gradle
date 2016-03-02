@@ -61,7 +61,7 @@ allprojects {
         fontawesomefx 'de.jensd:fontawesomefx:8.9'
         freemarker 'org.freemarker:freemarker:2.3.23'
         jsoup 'org.jsoup:jsoup:1.8.3'
-        leapmotion fileTree(dir: allLibs, include: 'Leap/*')
+        leapmotion fileTree(dir: new File(allLibs, 'Leap'), include: '*.jar')
         markdown 'com.github.rjeschke:txtmark:0.13'
         twitter4j 'org.twitter4j:twitter4j-core:4.0.4', 'org.twitter4j:twitter4j-stream:4.0.4'
         vertx 'io.vertx:vertx-core:3.2.1', 'io.vertx:vertx-web:3.2.1'
@@ -238,8 +238,16 @@ task installSnippetExecutorPlugins(dependsOn : [':SlideshowFX-go-executor:jar',
     }
 }
 
+task installGenericPlugins(dependsOn : [':SlideshowFX-leap-motion:jar']) << {
+    copy {
+        from project(':SlideshowFX-leap-motion').jar.archivePath
+
+        into pluginsFolder
+    }
+}
+
 task installAllPlugins(dependsOn: [ ':installMarkupPlugins', ':installContentExtensionPlugins',
-        ':installHostingConnectorPlugins', ':installSnippetExecutorPlugins']) << {
+        ':installHostingConnectorPlugins', ':installSnippetExecutorPlugins', ':installGenericPlugins']) << {
 }
 
 task packageSlideshowFX(dependsOn : [':SlideshowFX-asciidoctor:jar', ':SlideshowFX-html:jar', ':SlideshowFX-markdown:jar', ':SlideshowFX-textile:jar',

@@ -1,7 +1,5 @@
 package com.twasyl.slideshowfx.controllers;
 
-import com.leapmotion.leap.Controller;
-import com.leapmotion.leap.Listener;
 import com.twasyl.slideshowfx.app.SlideshowFX;
 import com.twasyl.slideshowfx.concurrent.*;
 import com.twasyl.slideshowfx.content.extension.IContentExtension;
@@ -1182,7 +1180,8 @@ public class SlideshowFXController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         // Create a LeapMotion controller in order to check/uncheck the checkbox enabling the LeapMotion or not.
         // This allows the checkbox to be in a correct state whether the LeapMotion is connected or not.
-        final Controller leapMotionController = new Controller();
+        // TODO LeapMotion
+        /*final Controller leapMotionController = new Controller();
         leapMotionController.addListener(new Listener() {
             @Override
             public void onInit(Controller controller) {
@@ -1208,7 +1207,7 @@ public class SlideshowFXController implements Initializable {
                 SlideshowFXController.this.leapMotionEnabled.setSelected(false);
             }
         });
-
+*/
         // We use reflection to disable all elements present in the list
         final Consumer<Object> disableElementLambda = element -> {
             try {
