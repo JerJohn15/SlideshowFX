@@ -1,8 +1,12 @@
 package com.twasyl.slideshowfx.global.configuration;
 
+import com.twasyl.slideshowfx.logs.SlideshowFXHandler;
+
 import java.io.*;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.Properties;
+import java.util.StringJoiner;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.*;
 
@@ -51,6 +55,41 @@ public class GlobalConfiguration {
     private static final Charset DEFAULT_CHARSET = UTF_8;
 
     /**
+     * Name of the parameter for defining the log level.
+     */
+    private static final String LOG_LEVEL_PARAMETER = ".level";
+
+    /**
+     * Name of the parameter for specifying the log handler.
+     */
+    private static final String LOG_HANDLERS_PARAMETER = "handlers";
+
+    /**
+     * Name of the parameter suffix for the specifying the encoding of the log file.
+     */
+    private static final String LOG_ENCODING_SUFFIX = ".encoding";
+
+    /**
+     * Name of the parameter for specifying the file log limit.
+     */
+    private static final String LOG_FILE_LIMIT_PARAMETER = "java.util.logging.FileHandler.limit";
+
+    /**
+     * Name of the parameter for specifying the pattern of the log file name.
+     */
+    private static final String LOG_FILE_PATTERN_PARAMETER = "java.util.logging.FileHandler.pattern";
+
+    /**
+     * Name of the parameter suffix for the log file formatter.
+     */
+    private static final String LOG_FORMATTER_SUFFIX = ".formatter";
+
+    /**
+     * Name of the parameter for specifying if logs must be appended to the log file.
+     */
+    private static final String LOG_FILE_APPEND_PARAMETER = "java.util.logging.FileHandler.append";
+
+    /**
      * The default {@link File folder} that contains the native libraries used by the application
      */
     private static final File NATIVE_LIBRARIES_FOLDER = new File(APPLICATION_DIRECTORY, "libraries");
@@ -90,21 +129,25 @@ public class GlobalConfiguration {
     }
 
     /**
-     * Fill the configuration with default values if it exists.
+     * Fill the configuration file with default values if it exists.
      */
     public synchronized static void fillConfigurationWithDefaultValue() {
         if(CONFIG_FILE.exists()) {
-            enableTemporaryFilesDeletionOnExit(true);
-            setTemporaryFilesMaxAge(7);
-            enableAutoSaving(false);
-            setAutoSavingInterval(5);
-            setLogLevel(Level.INFO);
-            setLogHandler(FileHandler.class);
-            setLogFileAppend(true);
-            setLogFileEncoding(UTF_8);
-            setLogFileFormatter(SimpleFormatter.class);
-            setLogFileLimit(50000);
-            setLogFilePattern("%h/.SlideshowFX/sfx%g.log");
+            final Properties properties = readAllPropertiesFromConfigurationFile();
+
+            if(!properties.containsKey(TEMPORARY_FILES_DELETION_ON_EXIT_PARAMETER)) enableTemporaryFilesDeletionOnExit(true);
+            if(!properties.containsKey(TEMPORARY_FILES_MAX_AGE_PARAMETER)) setTemporaryFilesMaxAge(7);
+            if(!properties.containsKey(AUTO_SAVING_ENABLED_PARAMETER)) enableAutoSaving(false);
+            if(!properties.containsKey(AUTO_SAVING_INTERVAL_PARAMETER)) setAutoSavingInterval(5);
+            if(!properties.containsKey(LOG_LEVEL_PARAMETER)) setLogLevel(Level.INFO);
+            if(!properties.containsKey(LOG_HANDLERS_PARAMETER)) setLogHandler(FileHandler.class, SlideshowFXHandler.class);
+            if(!properties.containsKey(LOG_FILE_APPEND_PARAMETER)) setLogFileAppend(true);
+            if(!properties.containsKey(FileHandler.class.getName().concat(LOG_ENCODING_SUFFIX))) setLogEncoding(FileHandler.class, UTF_8);
+            if(!properties.containsKey(FileHandler.class.getName().concat(LOG_FORMATTER_SUFFIX))) setLogFormatter(FileHandler.class, SimpleFormatter.class);
+            if(!properties.containsKey(LOG_FILE_LIMIT_PARAMETER)) setLogFileLimit(50000);
+            if(!properties.containsKey(LOG_FILE_PATTERN_PARAMETER)) setLogFilePattern("%h/.SlideshowFX/sfx%g.log");
+            if(!properties.containsKey(SlideshowFXHandler.class.getName().concat(LOG_ENCODING_SUFFIX))) setLogEncoding(SlideshowFXHandler.class, UTF_8);
+            if(!properties.containsKey(SlideshowFXHandler.class.getName().concat(LOG_FORMATTER_SUFFIX))) setLogFormatter(SlideshowFXHandler.class, SimpleFormatter.class);
         }
     }
 
@@ -329,23 +372,27 @@ public class GlobalConfiguration {
      * @param level The desired log level.
      */
     public static void setLogLevel(final Level level) {
-        setProperty(".level", level.getName());
+        setProperty(LOG_LEVEL_PARAMETER, level.getName());
     }
 
     /**
-     * Sets the default log handler.
-     * @param handler The handler of logs.
+     * Sets the default log handlers.
+     * @param handlers The handlers of logs.
      */
-    public static void setLogHandler(final Class<? extends Handler> handler) {
-        setProperty("handlers", handler.getName());
+    public static void setLogHandler(final Class<? extends Handler> ... handlers) {
+        final StringJoiner joiner = new StringJoiner(" ");
+        Arrays.stream(handlers).forEach(handler -> joiner.add(handler.getName()));
+
+        setProperty(LOG_HANDLERS_PARAMETER, joiner.toString());
     }
 
     /**
      * Sets the encoding of log files.
+     * @param handler The class handler to set the encoding for.
      * @param charset The encoding of log files.
      */
-    public static void setLogFileEncoding(final Charset charset) {
-        setProperty("java.util.logging.FileHandler.encoding", charset.displayName());
+    public static void setLogEncoding(final Class<? extends Handler> handler, final Charset charset) {
+        setProperty(handler.getName().concat(LOG_ENCODING_SUFFIX), charset.displayName());
     }
 
     /**
@@ -353,7 +400,7 @@ public class GlobalConfiguration {
      * @param size The size, in bytes, of log files.
      */
     public static void setLogFileLimit(final long size) {
-        setProperty("java.util.logging.FileHandler.limit", String.valueOf(size));
+        setProperty(LOG_FILE_LIMIT_PARAMETER, String.valueOf(size));
     }
 
     /**
@@ -361,15 +408,16 @@ public class GlobalConfiguration {
      * @param pattern The pattern of log files.
      */
     public static void setLogFilePattern(final String pattern) {
-        setProperty("java.util.logging.FileHandler.pattern", pattern);
+        setProperty(LOG_FILE_PATTERN_PARAMETER, pattern);
     }
 
     /**
      * Sets the class responsible of formatting log files.
+     * @param handler The class handler to set the formatter for.
      * @param formatter The formatter to use for log files.
      */
-    public static void setLogFileFormatter(final Class<? extends Formatter> formatter) {
-        setProperty("java.util.logging.FileHandler.formatter", formatter.getName());
+    public static void setLogFormatter(final Class<? extends Handler> handler, final Class<? extends Formatter> formatter) {
+        setProperty(handler.getName().concat(LOG_FORMATTER_SUFFIX), formatter.getName());
     }
 
     /**
@@ -377,7 +425,7 @@ public class GlobalConfiguration {
      * @param append {@code true} to allow appending, {@code false} otherwise.
      */
     public static void setLogFileAppend(final boolean append) {
-        setProperty("java.util.logging.FileHandler.append", String.valueOf(append));
+        setProperty(LOG_FILE_APPEND_PARAMETER, String.valueOf(append));
     }
 
     /**
