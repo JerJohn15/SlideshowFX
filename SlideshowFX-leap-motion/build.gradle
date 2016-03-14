@@ -19,7 +19,7 @@ jar {
         attributes('Manifest-Version': '1.0',
                 'Bundle-ManifestVersion': '2',
                 'Bundle-Name': 'SlideshowFX LeapMotion plugin',
-                'Bundle-SymbolicName': 'com.twasyl.slideshowfx.leap',
+                'Bundle-SymbolicName': 'com.twasyl.slideshowfx.leapmotion',
                 'Bundle-Description': 'Support for using a LeapMotion inside SlideshowFX',
                 'Bundle-Version': version,
                 'Bundle-Activator': 'com.twasyl.slideshowfx.leapmotion.activator.LeapMotionActivator',

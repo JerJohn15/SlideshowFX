@@ -13,15 +13,4 @@ import java.beans.PropertyChangeSupport;
  * @version 1.0
  */
 public class LeapMotionOptions implements IPluginOptions {
-
-    protected final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
-    private boolean enabled;
-
-    public boolean isEnabled() { return enabled; }
-
-    public void setEnabled(boolean enabled) {
-        final boolean oldValue = this.enabled;
-        this.enabled = enabled;
-        PlatformHelper.run(() -> this.propertyChangeSupport.firePropertyChange("archiveFile", oldValue, this.enabled));
-    }
 }

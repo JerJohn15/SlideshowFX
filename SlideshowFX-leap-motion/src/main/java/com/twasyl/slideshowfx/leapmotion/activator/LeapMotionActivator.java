@@ -8,15 +8,17 @@ import org.osgi.framework.BundleContext;
 import java.util.Hashtable;
 
 /**
+ * Activator starting the {@link LeapMotionPlugin}.
+ *
  * @author Thierry Wasylczenko
- * @since SlideshowFX
+ * @since SlideshowFX 1.0.0
+ * @version 1.0
  */
 public class LeapMotionActivator implements BundleActivator {
 
     @Override
     public void start(BundleContext bundleContext) throws Exception {
         Hashtable<String, String> props = new Hashtable<>();
-
         bundleContext.registerService(IPlugin.class.getName(), new LeapMotionPlugin(), props);
     }
 

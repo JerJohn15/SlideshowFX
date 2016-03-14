@@ -90,7 +90,7 @@ public class GlobalConfiguration {
     private static final String LOG_FILE_APPEND_PARAMETER = "java.util.logging.FileHandler.append";
 
     /**
-     * The default {@link File folder} that contains the native libraries used by the application
+     * The default {@link File folder} that contains the native libraries used by the application.
      */
     private static final File NATIVE_LIBRARIES_FOLDER = new File(APPLICATION_DIRECTORY, "libraries");
 

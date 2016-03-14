@@ -2,39 +2,55 @@ package com.twasyl.slideshowfx.leapmotion.controller;
 
 import com.leapmotion.leap.Controller;
 import com.leapmotion.leap.Listener;
+import com.twasyl.slideshowfx.app.SlideshowFX;
+import com.twasyl.slideshowfx.app.SlideshowFXState;
+import com.twasyl.slideshowfx.global.configuration.GlobalConfiguration;
+import com.twasyl.slideshowfx.leapmotion.listener.SlideshowFXLeapListener;
+
+import java.beans.PropertyChangeListener;
 
 /**
+ * An implementation of the {@link Listener} specific to SlideshowFX.
+ *
  * @author Thierry Wasylczenko
  * @since SlideshowFX 1.0.0
  * @version 1.0
  */
 public class SlideshowFXLeapController extends Controller {
 
+    private PropertyChangeListener applicationStateListener;
+    private SlideshowFXLeapListener leapListener;
+    private boolean enabled;
+
     public SlideshowFXLeapController() {
-        this.addListener(new Listener() {
-            @Override
-            public void onInit(Controller controller) {
-                if(!controller.isConnected()) {
-                    SlideshowFXController.this.leapMotionEnabled.setDisable(true);
-                } else {
-                    SlideshowFXController.this.leapMotionEnabled.setDisable(false);
-                    SlideshowFXController.this.leapMotionEnabled.setSelected(true);
+        this.initializeApplicationStateListener();
+        this.leapListener = new SlideshowFXLeapListener(null);
+
+        SlideshowFX.addPropertyChangeListener(this.applicationStateListener);
+    }
+
+    /**
+     * Initialize the listener managing the application's state change. If the application is in the
+     * {@link SlideshowFXState#PRESENTING} state, then a {@link SlideshowFXLeapListener} will be registered to this
+     * controller. But if the application is in the {@link SlideshowFXState#RUNNING} state, then the listener will be
+     * unregistered.
+     */
+    private void initializeApplicationStateListener() {
+        this.applicationStateListener = event -> {
+            if("APPLICATION_STATE".equals(event.getPropertyName()) && event.getNewValue() != null) {
+                if(event.getNewValue() == SlideshowFXState.PRESENTING && isEnabled()) {
+                    this.addListener(this.leapListener);
+                } else if(event.getNewValue() == SlideshowFXState.RUNNING) {
+                    this.removeListener(this.leapListener);
                 }
-
             }
+        };
+    }
 
-            @Override
-            public void onConnect(Controller controller) {
-                SlideshowFXController.this.leapMotionEnabled.setDisable(false);
-                // We don't select the checkbox because even if the LeapMotion becom available, the user may not want
-                // to enable it.
-            }
+    public boolean isEnabled() { return enabled; }
 
-            @Override
-            public void onDisconnect(Controller controller) {
-                SlideshowFXController.this.leapMotionEnabled.setDisable(true);
-                SlideshowFXController.this.leapMotionEnabled.setSelected(false);
-            }
-        });
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+        this.leapListener.setTracking(true);
     }
 }

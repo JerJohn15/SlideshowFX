@@ -1,5 +1,7 @@
 package com.twasyl.slideshowfx.controls.slideshow;
 
+import com.twasyl.slideshowfx.app.SlideshowFX;
+import com.twasyl.slideshowfx.app.SlideshowFXState;
 import com.twasyl.slideshowfx.engine.presentation.configuration.Slide;
 import com.twasyl.slideshowfx.server.bus.Actor;
 import javafx.event.EventHandler;
@@ -10,7 +12,10 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
+import java.beans.PropertyChangeSupport;
 import java.util.logging.Logger;
+
+import static com.twasyl.slideshowfx.app.SlideshowFXState.RUNNING;
 
 /**
  * The stage is defined when the presentation enters in slideshow mode. It defines a stage with the expected behaviour
@@ -38,10 +43,6 @@ public class SlideshowStage implements Actor {
     private static final String DO_NOT_CONSIDER_EVENT_TEXT = "do_not_consider";
     private Context context;
 
-    // TODO LeapMotion
-    // private Controller controller;
-    // private SlideshowFXLeapListener listener;
-
     private Runnable onCloseAction = null;
     private Stage slideshowStage, informationStage;
     private SlideshowPane slideshowPane;
@@ -56,10 +57,6 @@ public class SlideshowStage implements Actor {
 
         this.initializeSlideshowStage();
         this.initializeInformationStage();
-
-        // TODO LeapMotion
-        // this.initializeLeapMotion();
-
         this.initializeKeyEvents();
     }
 
@@ -156,34 +153,6 @@ public class SlideshowStage implements Actor {
     }
 
     /**
-     * TODO LeapMotion
-     * Initialize LeapMotion for this stage. It creates a LeapMotion {@link com.leapmotion.leap.Listener} as well as a
-     * {@link Controller} if the {@link Context#isLeapMotionEnabled()} returns {@code true}.
-     */
-    /*private final void initializeLeapMotion() {
-        if(this.context.isLeapMotionEnabled()) {
-            this.listener = new SlideshowFXLeapListener(this.slideshowPane);
-            this.listener.setTracking(true);
-            this.controller = new Controller();
-        } else {
-            this.listener = null;
-            this.controller = null;
-        }
-
-        this.slideshowStage.setOnShowing(event -> {
-            if (this.context.isLeapMotionEnabled()) {
-                this.controller.addListener(this.listener);
-            }
-        });
-
-        this.slideshowStage.setOnCloseRequest(event -> {
-            if (this.context.isLeapMotionEnabled()) {
-                this.controller.removeListener(this.listener);
-            }
-        });
-    } */
-
-    /**
      * Set the management of {@link KeyEvent} fired within the screens and browsers displayed. This allows to define the
      * communication of events between the {@link #slideshowPane} and the {@link #informationPane} meaning that when a
      * key is pressed in one or other of these screens, a {@link KeyEvent} is fired to the other one in order display
@@ -196,6 +165,8 @@ public class SlideshowStage implements Actor {
 
                 this.slideshowStage.close();
                 if (this.informationStage != null) this.informationStage.close();
+
+                SlideshowFX.setApplicationState(RUNNING);
             } else if(this.informationPane != null && !DO_NOT_CONSIDER_EVENT_TEXT.equals(event.getText())) {
                 final KeyEvent copiedEvent = this.copyEventWithNewText(event, DO_NOT_CONSIDER_EVENT_TEXT);
 

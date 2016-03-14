@@ -33,14 +33,14 @@ public class OSGiManager {
     public static void start() {
 
         Map configurationMap = new HashMap<>();
-        // configurationMap.put(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA, IMarkup.class.getPackage().getName() + "; 1.0.0");
         configurationMap.put(Constants.FRAMEWORK_STORAGE_CLEAN, "true");
         configurationMap.put("org.osgi.framework.storage.clean", "onFirstInit");
         configurationMap.put("org.osgi.framework.storage", System.getProperty("user.home") + "/.SlideshowFX/felix-cache");
         configurationMap.put("org.osgi.framework.bundle.parent", "app");
 
-        final StringJoiner bootdelegation = new StringJoiner(",");
-        bootdelegation.add("com.twasyl.slideshowfx.markup")
+        final StringJoiner bootdelegation = new StringJoiner(",")
+                      .add("com.twasyl.slideshowfx.app.*")
+                      .add("com.twasyl.slideshowfx.markup")
                       .add("com.twasyl.slideshowfx.content.extension")
                       .add("com.twasyl.slideshowfx.hosting.connector")
                       .add("com.twasyl.slideshowfx.hosting.connector.io")
@@ -56,6 +56,7 @@ public class OSGiManager {
                       .add("de.jensd.fx.glyphs.fontawesome")
                       .add("sun.misc")
                       .add("org.w3c.*")
+                      .add("java.*")
                       .add("javax.*")
                       .add("javafx.*")
                       .add("com.sun.javafx");
@@ -71,9 +72,6 @@ public class OSGiManager {
         } catch (BundleException e) {
             LOGGER.log(Level.SEVERE, "Can not start OSGi server");
         }
-
-        // Deploying the OSGi DataServices
-        // osgiFramework.getBundleContext().registerService(DataServices.class.getName(), new DataServices(), new Hashtable<>());
     }
 
     /**

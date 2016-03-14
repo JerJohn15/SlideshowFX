@@ -11,6 +11,7 @@ import com.twasyl.slideshowfx.server.SlideshowFXServer;
 import com.twasyl.slideshowfx.utils.io.DeleteFileVisitor;
 import com.twasyl.slideshowfx.utils.time.DateTimeUtils;
 import javafx.application.Application;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXMLLoader;
@@ -19,6 +20,9 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -27,20 +31,36 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static com.twasyl.slideshowfx.app.SlideshowFXState.*;
+
 public class SlideshowFX extends Application {
 
     private static final Logger LOGGER = Logger.getLogger(SlideshowFX.class.getName());
+    private static final PropertyChangeSupport PROPERTY_CHANGE_SUPPORT = new PropertyChangeSupport(SlideshowFX.class);
+
     private static final String PRESENTATION_ARGUMENT_PREFIX = "presentation";
     private static final String TEMPLATE_ARGUMENT_PREFIX = "template";
 
     private static final ReadOnlyObjectProperty<Stage> stage = new SimpleObjectProperty<>();
     private static final ReadOnlyObjectProperty<Scene> presentationBuilderScene = new SimpleObjectProperty<>();
 
+    private static SlideshowFXState APPLICATION_STATE = null;
     private final ReadOnlyObjectProperty<SlideshowFXController> mainController = new SimpleObjectProperty<>();
+
     private Set<File> filesToOpen;
+
+    public static void addPropertyChangeListener(final PropertyChangeListener listener) {
+        PROPERTY_CHANGE_SUPPORT.addPropertyChangeListener(listener);
+    }
+
+    public static void removePropertyChangeListener(final PropertyChangeListener listener) {
+        PROPERTY_CHANGE_SUPPORT.removePropertyChangeListener(listener);
+    }
 
     @Override
     public void init() throws Exception {
+        setApplicationState(INITIALIZING);
+
         // Initialize the configuration
         GlobalConfiguration.createApplicationDirectory();
 
@@ -120,11 +140,14 @@ public class SlideshowFX extends Application {
                 }
             });
         }
+
+        setApplicationState(RUNNING);
     }
 
     @Override
     public void stop() throws Exception {
         super.stop();
+        setApplicationState(STOPPING);
 
         this.mainController.get().closeAllPresentations(true);
 
@@ -189,6 +212,18 @@ public class SlideshowFX extends Application {
 
     public static ReadOnlyObjectProperty<Stage> stageProperty() { return stage; }
     public static Stage getStage() { return stageProperty().get(); }
+
+    public static SlideshowFXState getApplicationState() { return APPLICATION_STATE; }
+
+    public static void setApplicationState(SlideshowFXState applicationState) {
+        final SlideshowFXState oldState = APPLICATION_STATE;
+        SlideshowFX.APPLICATION_STATE = applicationState;
+
+        final PropertyChangeEvent event = new PropertyChangeEvent(SlideshowFX.class, "APPLICATION_STATE",
+                oldState, SlideshowFX.APPLICATION_STATE);
+
+        SlideshowFX.PROPERTY_CHANGE_SUPPORT.firePropertyChange(event);
+    }
 
     public static void main(String[] args) {
         LauncherImpl.launchApplication(SlideshowFX.class/*, SlideshowFXPreloader.class*/, args);

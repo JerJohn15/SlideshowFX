@@ -24,7 +24,6 @@ public class SlideshowFXLeapListener extends Listener {
     private static final String LEAP_MOTION_EVENT_ENDPOINT = "leapmotion.event";
 
     private final SlideshowPane scene;
-    private final LeapMotionPlugin plugin;
 
     /**
      * When performing a gesture, indicates the maximum angle from the X axis the gesture's direction could have.
@@ -43,12 +42,10 @@ public class SlideshowFXLeapListener extends Listener {
      * and click on the presentation using LeapMotion.
      *
      * @param scene The scene the listener will work on.
-     * @param plugin The plugin for which this controller is created.
      */
-    public SlideshowFXLeapListener(final SlideshowPane scene, final LeapMotionPlugin plugin) {
+    public SlideshowFXLeapListener(final SlideshowPane scene) {
         super();
         this.scene = scene;
-        this.plugin = plugin;
     }
 
     public boolean isTracking() { return tracking; }
@@ -58,14 +55,12 @@ public class SlideshowFXLeapListener extends Listener {
     public void onInit(Controller controller) {
         super.onInit(controller);
         LOGGER.finest("SlideshowFXLeapListener - onInit");
-        this.plugin.getOptions().setEnabled(controller.isConnected());
     }
 
     @Override
     public void onExit(Controller controller) {
         super.onExit(controller);
         LOGGER.finest("SlideshowFXLeapListener - onExit");
-        this.plugin.getOptions().setEnabled(false);
     }
 
     @Override
@@ -74,14 +69,12 @@ public class SlideshowFXLeapListener extends Listener {
         LOGGER.finest("LeapMotion controller connected");
         controller.enableGesture(Gesture.Type.TYPE_SWIPE);
         controller.enableGesture(Gesture.Type.TYPE_SCREEN_TAP);
-        this.plugin.getOptions().setEnabled(controller.isConnected());
     }
 
     @Override
     public void onDisconnect(Controller controller) {
         super.onDisconnect(controller);
         LOGGER.finest("LeapMotion controller disconnected");
-        this.plugin.getOptions().setEnabled(false);
     }
 
     @Override
@@ -257,7 +250,8 @@ public class SlideshowFXLeapListener extends Listener {
                             }
 
                             if(key != null) {
-                                EventBus.getInstance().broadcast(LEAP_MOTION_EVENT_ENDPOINT, );
+                                // TODO LeapMotion
+                                //EventBus.getInstance().broadcast(LEAP_MOTION_EVENT_ENDPOINT, );
                             }
                             this.scene.hidePointer();
                             this.scene.sendKey(KeyCode.LEFT);

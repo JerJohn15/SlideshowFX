@@ -1,8 +1,11 @@
 package com.twasyl.slideshowfx.leapmotion;
 
+import com.leapmotion.leap.Controller;
+import com.leapmotion.leap.Listener;
 import com.sun.javafx.PlatformUtil;
 import com.twasyl.slideshowfx.global.configuration.GlobalConfiguration;
 import com.twasyl.slideshowfx.leapmotion.activator.LeapMotionActivator;
+import com.twasyl.slideshowfx.leapmotion.controller.SlideshowFXLeapController;
 import com.twasyl.slideshowfx.leapmotion.listener.SlideshowFXLeapListener;
 import com.twasyl.slideshowfx.plugin.AbstractPlugin;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
@@ -14,21 +17,31 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.StringJoiner;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 /**
+ * The plugin allowing the interaction between a presentation and the LeapMotion controller.
+ *
  * @author Thierry Wasylczenko
  * @since SlideshowFX 1.0.0
  * @version 1.0
  */
 public class LeapMotionPlugin extends AbstractPlugin<LeapMotionOptions> {
 
+    public static final String LEAP_MOTION_NATIVE_LIBRARY_FOLDER_NAME = "Leap";
+    private SlideshowFXLeapController leapController;
+
     public LeapMotionPlugin() throws Exception {
         super("LeapMotion", new LeapMotionOptions());
 
         this.extractLibraries(GlobalConfiguration.getNativeLibrariesFolder());
+        this.redefineJavaLibraryPath(GlobalConfiguration.getNativeLibrariesFolder());
+        this.initializeLeapMotionController();
         this.initializeSlideshowFXUiElement();
     }
 
@@ -45,7 +58,7 @@ public class LeapMotionPlugin extends AbstractPlugin<LeapMotionOptions> {
         // Trick to get the app JAR file
         final File bundleJar = new File(LeapMotionActivator.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
 
-        final File leapFolder = new File(inFolder, "Leap");
+        final File leapFolder = new File(inFolder, LEAP_MOTION_NATIVE_LIBRARY_FOLDER_NAME);
         if(!leapFolder.exists() && !leapFolder.mkdir()) {
             throw new IOException("Can not create LeapMotion native library folder");
         }
@@ -128,6 +141,7 @@ public class LeapMotionPlugin extends AbstractPlugin<LeapMotionOptions> {
     private void initializeSlideshowFXUiElement() {
         final FontAwesomeIconView graphic = new FontAwesomeIconView(FontAwesomeIcon.HAND_ALT_UP);
         graphic.setGlyphStyle("-fx-fill: app-color-orange");
+        graphic.setGlyphSize(20);
 
         final Tooltip tooltip = new Tooltip("LeapMotion controller");
 
@@ -136,7 +150,59 @@ public class LeapMotionPlugin extends AbstractPlugin<LeapMotionOptions> {
         checkBox.setSelected(false);
         checkBox.setGraphic(graphic);
         checkBox.setTooltip(tooltip);
+        checkBox.selectedProperty().addListener((value, oldSelected, newSelected) -> {
+            this.leapController.setEnabled(newSelected);
+        });
 
         this.slideshowFXUiElement = checkBox;
+    }
+
+    /**
+     * Redefine the {@code java.library.path} to add the LeapMotion native libraries folder to it.
+     * @param rootFolder The root folder where the folder containing the LeapMotion native libraries are stored.
+     */
+    private void redefineJavaLibraryPath(final File rootFolder) throws Exception {
+        final File leapDir = new File(rootFolder, LEAP_MOTION_NATIVE_LIBRARY_FOLDER_NAME);
+
+        final Field usrPathsField = ClassLoader.class.getDeclaredField("usr_paths");
+        usrPathsField.setAccessible(true);
+
+        final String[] currentLibraryPath = (String[]) usrPathsField.get(null);
+
+        final String[] newLibraryPath = Arrays.copyOf(currentLibraryPath, currentLibraryPath.length + 1);
+        newLibraryPath[newLibraryPath.length - 1] = leapDir.getAbsolutePath();
+        usrPathsField.set(null, newLibraryPath);
+    }
+
+    /**
+     * Initializes the LeapMotion controller.
+     */
+    private void initializeLeapMotionController() {
+        this.leapController = new SlideshowFXLeapController();
+        this.leapController.addListener(new Listener() {
+            @Override
+            public void onInit(Controller controller) {
+                if(!controller.isConnected()) {
+                    LeapMotionPlugin.this.slideshowFXUiElement.setDisable(true);
+                } else {
+                    LeapMotionPlugin.this.slideshowFXUiElement.setDisable(false);
+                    ((CheckBox) LeapMotionPlugin.this.slideshowFXUiElement).setSelected(true);
+                }
+
+            }
+
+            @Override
+            public void onConnect(Controller controller) {
+                LeapMotionPlugin.this.slideshowFXUiElement.setDisable(false);
+                // We don't select the checkbox because even if the LeapMotion becomes available, the user may not want
+                // to enable it.
+            }
+
+            @Override
+            public void onDisconnect(Controller controller) {
+                LeapMotionPlugin.this.slideshowFXUiElement.setDisable(true);
+                ((CheckBox) LeapMotionPlugin.this.slideshowFXUiElement).setSelected(false);
+            }
+        });
     }
 }

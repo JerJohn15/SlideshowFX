@@ -23,6 +23,7 @@ import com.twasyl.slideshowfx.hosting.connector.io.RemoteFile;
 import com.twasyl.slideshowfx.io.SlideshowFXExtensionFilter;
 import com.twasyl.slideshowfx.markup.IMarkup;
 import com.twasyl.slideshowfx.osgi.OSGiManager;
+import com.twasyl.slideshowfx.plugin.IPlugin;
 import com.twasyl.slideshowfx.server.SlideshowFXServer;
 import com.twasyl.slideshowfx.server.service.AttendeeChatService;
 import com.twasyl.slideshowfx.server.service.PresenterChatService;
@@ -143,13 +144,13 @@ public class SlideshowFXController implements Initializable {
     @FXML private BorderPane root;
 
     /* Main ToolBar elements */
+    @FXML private ToolBar toolBar;
     @FXML private SplitMenuButton addSlideButton;
     @FXML private SplitMenuButton moveSlideButton;
     @FXML private ComboBox<String> serverIpAddress;
     @FXML private TextField serverPort;
     @FXML private TextField twitterHashtag;
     @FXML private Button startServerButton;
-    @FXML private CheckBox leapMotionEnabled;
 
     /* Main application UI elements */
     @FXML private TabPane openedPresentationsTabPane;
@@ -1170,15 +1171,12 @@ public class SlideshowFXController implements Initializable {
         if(view != null) {
             final PresentationEngine presentation = Presentations.getCurrentDisplayedPresentation();
             final String currentSlideId = fromCurrentSlide ? view.getCurrentSlideId() : null;
-            final boolean enabledLeapMotion = !this.leapMotionEnabled.disabledProperty().get()
-                    && this.leapMotionEnabled.selectedProperty().get();
 
             if (presentation.getConfiguration() != null
                     && presentation.getConfiguration().getPresentationFile() != null
                     && presentation.getConfiguration().getPresentationFile().exists()) {
 
                 final Context context = new Context();
-                context.setLeapMotionEnabled(enabledLeapMotion);
                 context.setStartAtSlideId(currentSlideId);
                 context.setPresentation(presentation);
 
@@ -1194,36 +1192,6 @@ public class SlideshowFXController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // Create a LeapMotion controller in order to check/uncheck the checkbox enabling the LeapMotion or not.
-        // This allows the checkbox to be in a correct state whether the LeapMotion is connected or not.
-        // TODO LeapMotion
-        /*final Controller leapMotionController = new Controller();
-        leapMotionController.addListener(new Listener() {
-            @Override
-            public void onInit(Controller controller) {
-                if(!controller.isConnected()) {
-                    SlideshowFXController.this.leapMotionEnabled.setDisable(true);
-                } else {
-                    SlideshowFXController.this.leapMotionEnabled.setDisable(false);
-                    SlideshowFXController.this.leapMotionEnabled.setSelected(true);
-                }
-
-            }
-
-            @Override
-            public void onConnect(Controller controller) {
-                SlideshowFXController.this.leapMotionEnabled.setDisable(false);
-                // We don't select the checkbox because even if the LeapMotion becom available, the user may not want
-                // to enable it.
-            }
-
-            @Override
-            public void onDisconnect(Controller controller) {
-                SlideshowFXController.this.leapMotionEnabled.setDisable(true);
-                SlideshowFXController.this.leapMotionEnabled.setSelected(false);
-            }
-        });
-*/
         // We use reflection to disable all elements present in the list
         final Consumer<Object> disableElementLambda = element -> {
             try {
@@ -1248,6 +1216,16 @@ public class SlideshowFXController implements Initializable {
                     createUploaderMenuItem(hostingConnector);
                     createDownloaderMenuItem(hostingConnector);
                 });
+
+        // Check if the LeapMotion plugin exists and display its UI element inside the toolbar
+        IPlugin leapMotionPlugin = OSGiManager.getInstalledServices(IPlugin.class)
+                .stream()
+                .filter(plugin -> plugin.getName().equals("LeapMotion"))
+                .findFirst()
+                .orElse(null);
+        if(leapMotionPlugin != null) {
+            this.toolBar.getItems().add(leapMotionPlugin.getSlideshowFXUiElement());
+        }
 
         this.openedPresentationsTabPane.getSelectionModel().selectedItemProperty().addListener((value, oldSelection, newSelection) -> {
             if(newSelection != null) {

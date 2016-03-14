@@ -68,6 +68,7 @@ SlideshowFX contains the following modules:
 - *SlideshowFX-global-configuration* which defines the classes allowing to access and interact the SlideshowFX configuration ;
 - *SlideshowFX-logs* which defines the classes for the logging ;
 - *SlideshowFX-osgi* which defines the OSGi classes that are useful for other modules ;
+- *SlideshowFX-plugin* which defines what a SlideshowFX plugin is ;
 - *SlideshowFX-server* which defines a server that is used by SlideshowFX ;
 - *SlideshowFX-markup* which defines the base classes for creating an OSGi module for supporting a new markup syntax in SlideshowFX to define slides' content ;
 - *SlideshowFX-asciidoctor* which defines the implementation of SlideshowFX-markup to define slides' content in asciidoctor ;
@@ -92,6 +93,7 @@ SlideshowFX contains the following modules:
 - *SlideshowFX-groovy-executor* which defines the base classes for creating an OSGi module for executing Groovy code snippet in a presentation ;
 - *SlideshowFX-java-executor* which defines the base classes for creating an OSGi module for executing Java code snippet in a presentation ;
 - *SlideshowFX-javascript-executor* which defines the base classes for creating an OSGi module for executing JavaScript code snippet in a presentation ;
+- *SlideshowFX-leap-motion* which allows a LeapMotion controller to interact with the presentation ;
 
 === Gradle
 
