@@ -54,6 +54,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Cursor;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -76,6 +77,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
@@ -1223,8 +1225,15 @@ public class SlideshowFXController implements Initializable {
                 .filter(plugin -> plugin.getName().equals("LeapMotion"))
                 .findFirst()
                 .orElse(null);
+
         if(leapMotionPlugin != null) {
-            this.toolBar.getItems().add(leapMotionPlugin.getSlideshowFXUiElement());
+            int index = 0;
+            while(index < toolBar.getItems().size()) {
+                if(toolBar.getItems().get(index).getId().equals("startOfServerZone")) {
+                    this.toolBar.getItems().add(index, leapMotionPlugin.getSlideshowFXUiElement());
+                    break;
+                }
+            }
         }
 
         this.openedPresentationsTabPane.getSelectionModel().selectedItemProperty().addListener((value, oldSelection, newSelection) -> {

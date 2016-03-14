@@ -182,6 +182,8 @@ public class LeapMotionPlugin extends AbstractPlugin<LeapMotionOptions> {
         this.leapController.addListener(new Listener() {
             @Override
             public void onInit(Controller controller) {
+                super.onInit(controller);
+
                 if(!controller.isConnected()) {
                     LeapMotionPlugin.this.slideshowFXUiElement.setDisable(true);
                 } else {
@@ -193,6 +195,7 @@ public class LeapMotionPlugin extends AbstractPlugin<LeapMotionOptions> {
 
             @Override
             public void onConnect(Controller controller) {
+                super.onInit(controller);
                 LeapMotionPlugin.this.slideshowFXUiElement.setDisable(false);
                 // We don't select the checkbox because even if the LeapMotion becomes available, the user may not want
                 // to enable it.
@@ -200,6 +203,7 @@ public class LeapMotionPlugin extends AbstractPlugin<LeapMotionOptions> {
 
             @Override
             public void onDisconnect(Controller controller) {
+                super.onInit(controller);
                 LeapMotionPlugin.this.slideshowFXUiElement.setDisable(true);
                 ((CheckBox) LeapMotionPlugin.this.slideshowFXUiElement).setSelected(false);
             }

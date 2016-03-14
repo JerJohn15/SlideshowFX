@@ -39,7 +39,7 @@ public class OSGiManager {
         configurationMap.put("org.osgi.framework.bundle.parent", "app");
 
         final StringJoiner bootdelegation = new StringJoiner(",")
-                      .add("com.twasyl.slideshowfx.app.*")
+                      //.add("com.twasyl.slideshowfx.app.*")
                       .add("com.twasyl.slideshowfx.markup")
                       .add("com.twasyl.slideshowfx.content.extension")
                       .add("com.twasyl.slideshowfx.hosting.connector")

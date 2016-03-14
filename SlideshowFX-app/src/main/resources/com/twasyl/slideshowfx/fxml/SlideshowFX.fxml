@@ -280,7 +280,7 @@
 
                 <fx:reference source="slideshow" />
 
-                <Separator />
+                <Separator fx:id="startOfServerZone" />
 
                 <FontAwesomeIconView glyphName="COMMENTS_ALT" glyphSize="$TOOLBAR_ICON_WIDTH" glyphStyle="-fx-fill: app-color-orange" />
 

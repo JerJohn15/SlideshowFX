@@ -2,9 +2,7 @@ package com.twasyl.slideshowfx.leapmotion.controller;
 
 import com.leapmotion.leap.Controller;
 import com.leapmotion.leap.Listener;
-import com.twasyl.slideshowfx.app.SlideshowFX;
 import com.twasyl.slideshowfx.app.SlideshowFXState;
-import com.twasyl.slideshowfx.global.configuration.GlobalConfiguration;
 import com.twasyl.slideshowfx.leapmotion.listener.SlideshowFXLeapListener;
 
 import java.beans.PropertyChangeListener;
@@ -26,7 +24,8 @@ public class SlideshowFXLeapController extends Controller {
         this.initializeApplicationStateListener();
         this.leapListener = new SlideshowFXLeapListener(null);
 
-        SlideshowFX.addPropertyChangeListener(this.applicationStateListener);
+        // TODO LeapMotion : find a way to make this work in OSGi
+        //SlideshowFX.addPropertyChangeListener(this.applicationStateListener);
     }
 
     /**

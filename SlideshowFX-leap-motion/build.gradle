@@ -25,7 +25,7 @@ jar {
                 'Bundle-Activator': 'com.twasyl.slideshowfx.leapmotion.activator.LeapMotionActivator',
                 'Bundle-ClassPath': configurations.leapmotion.resolve().collect { artifact -> artifact.name }.join(',').concat(',.'),
                 'Bundle-Vendor': 'Thierry Wasylczenko',
-                'Export-Package': 'com/twasyl/slideshowfx/leapmotion,com/twasyl/slideshowfx/leapmotion/activator,com/twasyl/slideshowfx/leapmotion/listener',
+                'Export-Package': 'com/twasyl/slideshowfx/leapmotion,com/twasyl/slideshowfx/leapmotion/activator,com/twasyl/slideshowfx/leapmotion/controller,com/twasyl/slideshowfx/leapmotion/listener',
                 'Import-Package': 'org.osgi.framework')
     }
 }
