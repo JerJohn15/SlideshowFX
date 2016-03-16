@@ -1229,10 +1229,11 @@ public class SlideshowFXController implements Initializable {
         if(leapMotionPlugin != null) {
             int index = 0;
             while(index < toolBar.getItems().size()) {
-                if(toolBar.getItems().get(index).getId().equals("startOfServerZone")) {
+                if("startOfServerZone".equals(toolBar.getItems().get(index).getId())) {
                     this.toolBar.getItems().add(index, leapMotionPlugin.getSlideshowFXUiElement());
                     break;
                 }
+                index++;
             }
         }
 
