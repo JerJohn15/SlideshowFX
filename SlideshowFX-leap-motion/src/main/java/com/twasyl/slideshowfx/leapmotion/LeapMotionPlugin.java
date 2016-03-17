@@ -6,7 +6,6 @@ import com.sun.javafx.PlatformUtil;
 import com.twasyl.slideshowfx.global.configuration.GlobalConfiguration;
 import com.twasyl.slideshowfx.leapmotion.activator.LeapMotionActivator;
 import com.twasyl.slideshowfx.leapmotion.controller.SlideshowFXLeapController;
-import com.twasyl.slideshowfx.leapmotion.listener.SlideshowFXLeapListener;
 import com.twasyl.slideshowfx.plugin.AbstractPlugin;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
@@ -20,9 +19,9 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.StringJoiner;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.logging.Logger;
 
 /**
  * The plugin allowing the interaction between a presentation and the LeapMotion controller.
@@ -33,6 +32,7 @@ import java.util.jar.JarFile;
  */
 public class LeapMotionPlugin extends AbstractPlugin<LeapMotionOptions> {
 
+    private static final Logger LOGGER = Logger.getLogger(LeapMotionPlugin.class.getName());
     public static final String LEAP_MOTION_NATIVE_LIBRARY_FOLDER_NAME = "Leap";
     private SlideshowFXLeapController leapController;
 
@@ -184,18 +184,17 @@ public class LeapMotionPlugin extends AbstractPlugin<LeapMotionOptions> {
             public void onInit(Controller controller) {
                 super.onInit(controller);
 
-                if(!controller.isConnected()) {
-                    LeapMotionPlugin.this.slideshowFXUiElement.setDisable(true);
-                } else {
+                if(controller.isConnected()) {
                     LeapMotionPlugin.this.slideshowFXUiElement.setDisable(false);
                     ((CheckBox) LeapMotionPlugin.this.slideshowFXUiElement).setSelected(true);
+                } else {
+                    LeapMotionPlugin.this.slideshowFXUiElement.setDisable(true);
                 }
-
             }
 
             @Override
             public void onConnect(Controller controller) {
-                super.onInit(controller);
+              super.onConnect(controller);
                 LeapMotionPlugin.this.slideshowFXUiElement.setDisable(false);
                 // We don't select the checkbox because even if the LeapMotion becomes available, the user may not want
                 // to enable it.
@@ -203,7 +202,7 @@ public class LeapMotionPlugin extends AbstractPlugin<LeapMotionOptions> {
 
             @Override
             public void onDisconnect(Controller controller) {
-                super.onInit(controller);
+                super.onDisconnect(controller);
                 LeapMotionPlugin.this.slideshowFXUiElement.setDisable(true);
                 ((CheckBox) LeapMotionPlugin.this.slideshowFXUiElement).setSelected(false);
             }
