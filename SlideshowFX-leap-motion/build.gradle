@@ -24,6 +24,7 @@ jar {
                 'Bundle-Version': version,
                 'Bundle-Activator': 'com.twasyl.slideshowfx.leapmotion.activator.LeapMotionActivator',
                 'Bundle-ClassPath': configurations.leapmotion.resolve().collect { artifact -> artifact.name }.join(',').concat(',.'),
+                'Bundle-NativeCode': '~/.SlideshowFX/libraries/Leap/libLeapJava.dylib, ~/.SlideshowFX/libraries/Leap/libLeap.dylib',
                 'Bundle-Vendor': 'Thierry Wasylczenko',
                 'Export-Package': 'com/twasyl/slideshowfx/leapmotion,com/twasyl/slideshowfx/leapmotion/activator,com/twasyl/slideshowfx/leapmotion/controller,com/twasyl/slideshowfx/leapmotion/listener',
                 'Import-Package': 'org.osgi.framework')

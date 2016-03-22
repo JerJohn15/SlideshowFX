@@ -171,6 +171,9 @@ public class LeapMotionPlugin extends AbstractPlugin<LeapMotionOptions> {
         final String[] newLibraryPath = Arrays.copyOf(currentLibraryPath, currentLibraryPath.length + 1);
         newLibraryPath[newLibraryPath.length - 1] = leapDir.getAbsolutePath();
         usrPathsField.set(null, newLibraryPath);
+
+        System.loadLibrary("libLeap.dylib");
+        System.loadLibrary("libLeapJava.dylib");
     }
 
     /**
