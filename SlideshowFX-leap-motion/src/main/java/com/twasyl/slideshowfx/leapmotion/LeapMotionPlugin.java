@@ -1,11 +1,10 @@
 package com.twasyl.slideshowfx.leapmotion;
 
-import com.leapmotion.leap.Controller;
-import com.leapmotion.leap.Listener;
 import com.sun.javafx.PlatformUtil;
 import com.twasyl.slideshowfx.global.configuration.GlobalConfiguration;
 import com.twasyl.slideshowfx.leapmotion.activator.LeapMotionActivator;
 import com.twasyl.slideshowfx.leapmotion.controller.SlideshowFXLeapController;
+import com.twasyl.slideshowfx.leapmotion.listener.NodeUpdaterLeapListener;
 import com.twasyl.slideshowfx.plugin.AbstractPlugin;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
@@ -41,8 +40,8 @@ public class LeapMotionPlugin extends AbstractPlugin<LeapMotionOptions> {
 
         this.extractLibraries(GlobalConfiguration.getNativeLibrariesFolder());
         this.redefineJavaLibraryPath(GlobalConfiguration.getNativeLibrariesFolder());
-        this.initializeLeapMotionController();
         this.initializeSlideshowFXUiElement();
+        this.initializeLeapMotionController();
     }
 
     /**
@@ -179,33 +178,6 @@ public class LeapMotionPlugin extends AbstractPlugin<LeapMotionOptions> {
      */
     private void initializeLeapMotionController() {
         this.leapController = new SlideshowFXLeapController();
-        this.leapController.addListener(new Listener() {
-            @Override
-            public void onInit(Controller controller) {
-                super.onInit(controller);
-
-                if(controller.isConnected()) {
-                    LeapMotionPlugin.this.slideshowFXUiElement.setDisable(false);
-                    ((CheckBox) LeapMotionPlugin.this.slideshowFXUiElement).setSelected(true);
-                } else {
-                    LeapMotionPlugin.this.slideshowFXUiElement.setDisable(true);
-                }
-            }
-
-            @Override
-            public void onConnect(Controller controller) {
-              super.onConnect(controller);
-                LeapMotionPlugin.this.slideshowFXUiElement.setDisable(false);
-                // We don't select the checkbox because even if the LeapMotion becomes available, the user may not want
-                // to enable it.
-            }
-
-            @Override
-            public void onDisconnect(Controller controller) {
-                super.onDisconnect(controller);
-                LeapMotionPlugin.this.slideshowFXUiElement.setDisable(true);
-                ((CheckBox) LeapMotionPlugin.this.slideshowFXUiElement).setSelected(false);
-            }
-        });
+        this.leapController.addListener(new NodeUpdaterLeapListener((CheckBox) this.slideshowFXUiElement));
     }
 }
