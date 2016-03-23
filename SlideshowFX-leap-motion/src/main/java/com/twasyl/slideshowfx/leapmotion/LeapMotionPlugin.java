@@ -1,6 +1,5 @@
 package com.twasyl.slideshowfx.leapmotion;
 
-import com.twasyl.slideshowfx.global.configuration.GlobalConfiguration;
 import com.twasyl.slideshowfx.leapmotion.controller.SlideshowFXLeapController;
 import com.twasyl.slideshowfx.leapmotion.listener.NodeUpdaterLeapListener;
 import com.twasyl.slideshowfx.plugin.AbstractPlugin;
