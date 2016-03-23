@@ -90,11 +90,6 @@ public class GlobalConfiguration {
     private static final String LOG_FILE_APPEND_PARAMETER = "java.util.logging.FileHandler.append";
 
     /**
-     * The default {@link File folder} that contains the native libraries used by the application.
-     */
-    private static final File NATIVE_LIBRARIES_FOLDER = new File(APPLICATION_DIRECTORY, "libraries");
-
-    /**
      * Creates the configuration directory represented by the {@link #APPLICATION_DIRECTORY} variable if it doesn't
      * already exist.
      * @return {@code true} if the application directory has been created by this method, {@code false} otherwise.
@@ -465,10 +460,4 @@ public class GlobalConfiguration {
      * @return The default charset used by the application.
      */
     public static Charset getDefaultCharset() { return DEFAULT_CHARSET; }
-
-    /**
-     * Get the folder that can be used to store native libraries used by the application.
-     * @return The native libraries' folder.
-     */
-    public static File getNativeLibrariesFolder() { return NATIVE_LIBRARIES_FOLDER; }
 }

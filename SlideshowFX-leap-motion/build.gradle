@@ -11,7 +11,7 @@ dependencies {
 }
 
 def buildNativeCodeHeader() {
-    def basePackage = '/com/twasyl/slideshowfx/leapmotion/libraries/'
+    def basePackage = 'com/twasyl/slideshowfx/leapmotion/libraries/'
     def osxBasePackage = "${basePackage}osx/";
     def windowsBasePackage = "${basePackage}windows/"
     def linuxBasePackage = "${basePackage}linux/"
