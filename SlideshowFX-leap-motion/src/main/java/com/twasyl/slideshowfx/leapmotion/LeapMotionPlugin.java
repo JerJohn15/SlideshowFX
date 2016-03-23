@@ -38,7 +38,7 @@ public class LeapMotionPlugin extends AbstractPlugin<LeapMotionOptions> {
     public LeapMotionPlugin() throws Exception {
         super("LeapMotion", new LeapMotionOptions());
 
-        this.extractLibraries(GlobalConfiguration.getNativeLibrariesFolder());
+        // this.extractLibraries(GlobalConfiguration.getNativeLibrariesFolder());
         this.redefineJavaLibraryPath(GlobalConfiguration.getNativeLibrariesFolder());
         this.initializeSlideshowFXUiElement();
         this.initializeLeapMotionController();
@@ -161,7 +161,7 @@ public class LeapMotionPlugin extends AbstractPlugin<LeapMotionOptions> {
      * @param rootFolder The root folder where the folder containing the LeapMotion native libraries are stored.
      */
     private void redefineJavaLibraryPath(final File rootFolder) throws Exception {
-        final File leapDir = new File(rootFolder, LEAP_MOTION_NATIVE_LIBRARY_FOLDER_NAME);
+        /* final File leapDir = new File(rootFolder, LEAP_MOTION_NATIVE_LIBRARY_FOLDER_NAME);
 
         final Field usrPathsField = ClassLoader.class.getDeclaredField("usr_paths");
         usrPathsField.setAccessible(true);
@@ -170,10 +170,10 @@ public class LeapMotionPlugin extends AbstractPlugin<LeapMotionOptions> {
 
         final String[] newLibraryPath = Arrays.copyOf(currentLibraryPath, currentLibraryPath.length + 1);
         newLibraryPath[newLibraryPath.length - 1] = leapDir.getAbsolutePath();
-        usrPathsField.set(null, newLibraryPath);
+        usrPathsField.set(null, newLibraryPath); */
 
-        System.loadLibrary("libLeap.dylib");
-        System.loadLibrary("libLeapJava.dylib");
+        System.loadLibrary("libLeap");
+        System.loadLibrary("libLeapJava");
     }
 
     /**

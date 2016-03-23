@@ -10,6 +10,21 @@ dependencies {
     compile configurations.leapmotion
 }
 
+def buildNativeCodeHeader() {
+    def basePackage = '/com/twasyl/slideshowfx/leapmotion/libraries/'
+    def osxBasePackage = "${basePackage}osx/";
+    def windowsBasePackage = "${basePackage}windows/"
+    def linuxBasePackage = "${basePackage}linux/"
+
+    return """\
+${osxBasePackage}libLeap.dylib; ${osxBasePackage}libLeapJava.dylib; osname=Mac OS X; processor=x86_64,\
+${windowsBasePackage}x86_64/libLeap.dll; ${windowsBasePackage}x86_64/libLeapJava.dll; osname=win32; processor=x86_64,\
+${windowsBasePackage}x86/libLeap.dll; ${windowsBasePackage}x86/libLeapJava.dll; osname=win32; processor=x86,\
+${linuxBasePackage}x86_64/libLeap.so; ${linuxBasePackage}x86_64/libLeapJava.so; osname=Linux; processor=x86_64,\
+${linuxBasePackage}x86/libLeap.so; ${linuxBasePackage}x86/libLeapJava.so; osname=Linux; processor=x86,\
+"""
+}
+
 jar {
     from(configurations.leapmotion.resolve().collect()) {
         include '*'
@@ -24,7 +39,7 @@ jar {
                 'Bundle-Version': version,
                 'Bundle-Activator': 'com.twasyl.slideshowfx.leapmotion.activator.LeapMotionActivator',
                 'Bundle-ClassPath': configurations.leapmotion.resolve().collect { artifact -> artifact.name }.join(',').concat(',.'),
-                'Bundle-NativeCode': '~/.SlideshowFX/libraries/Leap/libLeapJava.dylib, ~/.SlideshowFX/libraries/Leap/libLeap.dylib',
+                'Bundle-NativeCode': buildNativeCodeHeader(),
                 'Bundle-Vendor': 'Thierry Wasylczenko',
                 'Export-Package': 'com/twasyl/slideshowfx/leapmotion,com/twasyl/slideshowfx/leapmotion/activator,com/twasyl/slideshowfx/leapmotion/controller,com/twasyl/slideshowfx/leapmotion/listener',
                 'Import-Package': 'org.osgi.framework')
