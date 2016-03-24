@@ -8,8 +8,6 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Tooltip;
 
-import java.util.logging.Logger;
-
 /**
  * The plugin allowing the interaction between a presentation and the LeapMotion controller.
  *
@@ -19,8 +17,6 @@ import java.util.logging.Logger;
  */
 public class LeapMotionPlugin extends AbstractPlugin<LeapMotionOptions> {
 
-    private static final Logger LOGGER = Logger.getLogger(LeapMotionPlugin.class.getName());
-    public static final String LEAP_MOTION_NATIVE_LIBRARY_FOLDER_NAME = "Leap";
     private SlideshowFXLeapController leapController;
 
     public LeapMotionPlugin() throws Exception {
