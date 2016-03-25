@@ -226,6 +226,6 @@ public class SlideshowFX extends Application {
     }
 
     public static void main(String[] args) {
-        LauncherImpl.launchApplication(SlideshowFX.class/*, SlideshowFXPreloader.class*/, args);
+        SlideshowFX.launch(args);
     }
 }
