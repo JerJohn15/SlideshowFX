@@ -13,7 +13,6 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.FileList;
-import com.google.api.services.drive.model.ParentReference;
 import com.twasyl.slideshowfx.engine.presentation.PresentationEngine;
 import com.twasyl.slideshowfx.global.configuration.GlobalConfiguration;
 import com.twasyl.slideshowfx.hosting.connector.AbstractHostingConnector;
@@ -252,8 +251,8 @@ public class DriveHostingConnector extends AbstractHostingConnector<BasicHosting
                             .setQ(query.toString())
                             .execute();
 
-                    if(!files.getItems().isEmpty()) {
-                        body = files.getItems().get(0);
+                    if(!files.getFiles().isEmpty()) {
+                        body = files.getFiles().get(0);
                     }
                 } catch (IOException e) {
                     LOGGER.log(Level.SEVERE, "Can not find file to overwrite", e);
@@ -265,19 +264,16 @@ public class DriveHostingConnector extends AbstractHostingConnector<BasicHosting
                 if(folder instanceof GoogleFile) {
                     final GoogleFile googleFolder = (GoogleFile) folder;
 
-                    final ParentReference parent = new ParentReference();
-                    parent.setId(googleFolder.getId());
-
-                    body.setParents(Arrays.asList(parent));
+                    body.setParents(Arrays.asList(googleFolder.getId()));
                 }
 
                 if(this.fileExists(engine, folder)) {
                     final String nameWithoutExtension = engine.getArchive().getName().substring(0, engine.getArchive().getName().lastIndexOf("."));
                     final Calendar calendar = Calendar.getInstance();
 
-                    body.setTitle(String.format("%1$s %2$tF %2$tT.%3$s", nameWithoutExtension, calendar, engine.getArchiveExtension()));
+                    body.setName(String.format("%1$s %2$tF %2$tT.%3$s", nameWithoutExtension, calendar, engine.getArchiveExtension()));
                 } else {
-                    body.setTitle(engine.getArchive().getName());
+                    body.setName(engine.getArchive().getName());
                 }
             }
 
@@ -287,9 +283,8 @@ public class DriveHostingConnector extends AbstractHostingConnector<BasicHosting
                 if(overwrite)
                     service.files()
                             .update(body.getId(), body, mediaContent)
-                            .setNewRevision(true)
                             .execute();
-                else service.files().insert(body, mediaContent).execute();
+                else service.files().create(body, mediaContent).execute();
             } catch (IOException e) {
                 LOGGER.log(Level.SEVERE, "Can not upload presentation to Google Drive", e);
             }
@@ -360,9 +355,9 @@ public class DriveHostingConnector extends AbstractHostingConnector<BasicHosting
                         .execute();
 
                 GoogleFile child;
-                for(com.google.api.services.drive.model.File reference : files.getItems()) {
-                    child = new GoogleFile((GoogleFile) parent, reference.getTitle(), reference.getId());
-                    child.setDownloadUrl(reference.getDownloadUrl());
+                for(com.google.api.services.drive.model.File reference : files.getFiles()) {
+                    child = new GoogleFile((GoogleFile) parent, reference.getName(), reference.getId());
+                    child.setDownloadUrl(reference.getWebContentLink());
                     folders.add(child);
                 }
             } catch (IOException e) {
@@ -401,7 +396,7 @@ public class DriveHostingConnector extends AbstractHostingConnector<BasicHosting
                         .setQ(query.toString())
                         .execute();
 
-                exist = !files.getItems().isEmpty();
+                exist = !files.getFiles().isEmpty();
             } catch (IOException e) {
                 LOGGER.log(Level.SEVERE, "Can not list files of Google Drive", e);
             }
