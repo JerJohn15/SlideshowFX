@@ -25,7 +25,7 @@ public class OSGiManagerTest {
 
     private static OSGiManager osgiManager;
     private static final File ROOT_OSGI = new File("build/resources/test/com/twasyl/slideshowfx/osgi");
-    private static final File PLUGINS_DIR = new File(ROOT_OSGI, "plugins");
+    private static final File PLUGINS_DIR = new File(ROOT_OSGI, "testPlugins");
     private static final File PLUGIN_1_0 = new File(PLUGINS_DIR, "plugin-1.0.jar");
     private static final File PLUGIN_1_1 = new File(PLUGINS_DIR, "plugin-1.1.jar");
     private static final File PLUGIN_1_2 = new File(PLUGINS_DIR, "plugin-1.2.jar");
