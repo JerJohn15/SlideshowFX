@@ -13,6 +13,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.channels.OverlappingFileLockException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 
 import static java.util.logging.Level.SEVERE;
 import static java.util.logging.Level.WARNING;
+import static org.osgi.framework.Constants.*;
 
 /**
  * This class manages all OSGi bundles: from installation to uninstallation. It also starts the OSGi container as well
@@ -63,12 +65,10 @@ public class OSGiManager {
      * Start the OSGi container.
      */
     public void start() {
-
-        Map configurationMap = new HashMap<>();
-        configurationMap.put(Constants.FRAMEWORK_STORAGE_CLEAN, "true");
-        configurationMap.put("org.osgi.framework.storage.clean", "onFirstInit");
-        configurationMap.put("org.osgi.framework.storage", this.osgiCache.getAbsolutePath().replaceAll("\\\\", "/"));
-        configurationMap.put("org.osgi.framework.bundle.parent", "app");
+        final Map configurationMap = new HashMap<>();
+        configurationMap.put(FRAMEWORK_STORAGE_CLEAN, FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT);
+        configurationMap.put(FRAMEWORK_STORAGE, this.osgiCache.getAbsolutePath().replaceAll("\\\\", "/"));
+        configurationMap.put(FRAMEWORK_BUNDLE_PARENT, FRAMEWORK_BUNDLE_PARENT_APP);
 
         final StringJoiner bootdelegation = new StringJoiner(",");
         bootdelegation.add("com.twasyl.slideshowfx.markup")
@@ -90,16 +90,15 @@ public class OSGiManager {
                       .add("javax.*")
                       .add("javafx.*")
                       .add("com.sun.javafx");
-        configurationMap.put("org.osgi.framework.bootdelegation", bootdelegation.toString());
-        configurationMap.put("felix.auto.deploy.action", "install,start");
+        configurationMap.put(FRAMEWORK_BOOTDELEGATION, bootdelegation.toString());
 
         // Starting OSGi
-        FrameworkFactory frameworkFactory = ServiceLoader.load(FrameworkFactory.class).iterator().next();
+        final FrameworkFactory frameworkFactory = ServiceLoader.load(FrameworkFactory.class).iterator().next();
         osgiFramework = frameworkFactory.newFramework(configurationMap);
         try {
             osgiFramework.start();
             LOGGER.fine("OSGI container has bee started successfully");
-        } catch (BundleException e) {
+        } catch (BundleException | OverlappingFileLockException e) {
             LOGGER.log(SEVERE, "Can not start OSGi server", e);
             try {
                 osgiFramework.stop();
@@ -220,7 +219,7 @@ public class OSGiManager {
                 }
             } else if(!isPluginInAnotherVersionInstalled && !isPluginActive(bundle) && isPluginMostRecent && start) {
                 startBundle(bundle);
-            } else {
+            } else if(isPluginInAnotherVersionInstalled && !isPluginMostRecent) {
                 uninstallBundle(bundle);
                 bundle = null;
             }
@@ -258,6 +257,13 @@ public class OSGiManager {
             } catch (BundleException e) {
                 LOGGER.log(WARNING, String.format("Can not uninstall bundle [%1$s] in version [%2$s]", bundle.getSymbolicName(), bundle.getVersion().toString()));
             }
+
+            try {
+                final File bundleFile = new File(new URL(bundle.getLocation()).getFile());
+                bundleFile.deleteOnExit();
+            } catch (MalformedURLException e) {
+                LOGGER.log(Level.SEVERE, "Can not determine bundle location", e);
+            }
         }
     }
 
@@ -289,7 +295,6 @@ public class OSGiManager {
 
                 if(!continueSearching) {
                     uninstallBundle(installedBundle);
-                    installedBundleFile.deleteOnExit();
                 }
             } catch (MalformedURLException e) {
                 LOGGER.log(Level.FINE, "Can not create the URL of the bundle: " + bundleFile.getName(), e);
@@ -343,6 +348,25 @@ public class OSGiManager {
         }
 
         return installedPlugins;
+    }
+
+    /**
+     * Get the list of active plugins.
+     * @return The list of active plugins.
+     */
+    public List<File> getActivePlugins() {
+        return Arrays.stream(this.osgiFramework.getBundleContext().getBundles())
+                        .filter(bundle -> !SYSTEM_BUNDLE_LOCATION.equals(bundle.getLocation()))
+                        .map(bundle -> {
+                            try {
+                                return new File(new URL(bundle.getLocation()).getFile());
+                            } catch (MalformedURLException e) {
+                                LOGGER.log(Level.SEVERE, "Can not determine plugin location", e);
+                                return null;
+                            }
+                        })
+                        .filter(file -> file != null)
+                        .collect(Collectors.toList());
     }
 
     public Object getPresentationProperty(String property) {

@@ -1,18 +1,20 @@
 package com.twasyl.slideshowfx.osgi;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import com.twasyl.slideshowfx.utils.io.CopyFileVisitor;
+import com.twasyl.slideshowfx.utils.io.IOUtils;
+import org.junit.*;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 
 import static org.junit.Assert.*;
+import static org.osgi.framework.Constants.SYSTEM_BUNDLE_LOCATION;
 
 /**
  * This class tests the {@link OSGiManager} classes
@@ -26,6 +28,7 @@ public class OSGiManagerTest {
     private static OSGiManager osgiManager;
     private static final File ROOT_OSGI = new File("build/resources/test/com/twasyl/slideshowfx/osgi");
     private static final File PLUGINS_DIR = new File(ROOT_OSGI, "testPlugins");
+    private static final File OSGI_CACHE_DIR = new File(ROOT_OSGI, "felix-cache");
     private static final File PLUGIN_1_0 = new File(PLUGINS_DIR, "plugin-1.0.jar");
     private static final File PLUGIN_1_1 = new File(PLUGINS_DIR, "plugin-1.1.jar");
     private static final File PLUGIN_1_2 = new File(PLUGINS_DIR, "plugin-1.2.jar");
@@ -35,11 +38,19 @@ public class OSGiManagerTest {
     public static void setUp() {
         osgiManager = new OSGiManager();
         osgiManager.pluginsDirectory = PLUGINS_DIR;
-        osgiManager.osgiCache = new File(ROOT_OSGI, "felix-cache");
+    }
+
+    @AfterClass
+    public static void tearDown() throws IOException {
+        IOUtils.deleteDirectory(OSGI_CACHE_DIR);
     }
 
     @Before
     public void before() throws URISyntaxException, IOException {
+        final Path source = new File("src/test/resources/com/twasyl/slideshowfx/osgi/testPlugins").toPath().toAbsolutePath();
+        Files.walkFileTree(source, new CopyFileVisitor(ROOT_OSGI.toPath().toAbsolutePath(), source));
+
+        osgiManager.osgiCache = new File(OSGI_CACHE_DIR, System.currentTimeMillis() + "");
         osgiManager.start();
     }
 
@@ -185,6 +196,7 @@ public class OSGiManagerTest {
 
     @Test
     public void startAndDeploy() {
+        osgiManager.stop();
         osgiManager.startAndDeploy();
         assertNotNull(osgiManager.osgiFramework);
 
@@ -192,7 +204,8 @@ public class OSGiManagerTest {
         Bundle[] bundles = osgiManager.osgiFramework.getBundleContext().getBundles();
         assertEquals(3, bundles.length);
 
-        final long activePlugins = Arrays.stream(bundles).filter(osgiManager::isPluginActive).count();
+        final long activePlugins = Arrays.stream(bundles)
+                .filter(bundle -> !SYSTEM_BUNDLE_LOCATION.equals(bundle.getLocation()) && osgiManager.isPluginActive(bundle)).count();
         assertEquals(2, activePlugins);
     }
 }

@@ -182,7 +182,7 @@ public class PluginCenterController implements Initializable {
     }
 
     protected void populatePluginsView() {
-        for(File pluginFile : PLUGINS_DIRECTORY.listFiles()) {
+        for(File pluginFile : OSGiManager.getInstance().getActivePlugins()) {
             if(pluginFile.getName().endsWith(".jar")) {
                 final PluginFileButton button = new PluginFileButton(pluginFile);
                 button.setSelected(true);
